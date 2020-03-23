@@ -15,11 +15,11 @@ type Lexer struct {
 	currentLine     int
 }
 
-func NewLexer(input string) *Lexer {
+func New(input string) *Lexer {
 	return &Lexer{codeInput: []rune(input), currentLine: 1}
 }
 
-func NewLexerForFile(filename string) (*Lexer, error) {
+func NewForFile(filename string) (*Lexer, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, fmt.Errorf("unable to initialize Lexer: %s", err)
@@ -119,7 +119,7 @@ func (l *Lexer) peekNextRune() rune {
 }
 
 func (l *Lexer) readRune(position int) rune {
-	if position >= len(l.codeInput)-1 {
+	if position >= len(l.codeInput) {
 		return 0
 	}
 	return l.codeInput[position]

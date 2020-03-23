@@ -26,7 +26,7 @@ func TestLexer_NextToken(t *testing.T) {
 	10 == 10;
 	10 != 9;
 	`
-	lexer := NewLexer(code)
+	lexer := New(code)
 
 	tests := []struct {
 		token TokenType
