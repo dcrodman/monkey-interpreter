@@ -13,7 +13,18 @@ func TestLexer_NextToken(t *testing.T) {
 	}; 
 	
 	let result = add( five, ten );
-	let bigNumber = 130;
+
+	!-/*5;
+	5 < 10 > 5; 
+
+	if (5 < 10) { 
+		return true; 
+	} else { 
+		return false; 
+	}
+
+	10 == 10;
+	10 != 9;
 	`
 	lexer := NewLexer(code)
 
@@ -49,6 +60,61 @@ func TestLexer_NextToken(t *testing.T) {
 		{SEMICOLON, ";"},
 		{RBRACKET, "}"},
 		{SEMICOLON, ";"},
+
+		{LET, "let"},
+		{IDENTIFIER, "result"},
+		{ASSIGN, "="},
+		{IDENTIFIER, "add"},
+		{LPAREN, "("},
+		{IDENTIFIER, "five"},
+		{COMMA, ","},
+		{IDENTIFIER, "ten"},
+		{RPAREN, ")"},
+		{SEMICOLON, ";"},
+
+		{BANG, "!"},
+		{MINUS, "-"},
+		{SLASH, "/"},
+		{ASTERISK, "*"},
+		{INT, "5"},
+		{SEMICOLON, ";"},
+
+		{INT, "5"},
+		{LES, "<"},
+		{INT, "10"},
+		{GRT, ">"},
+		{INT, "5"},
+		{SEMICOLON, ";"},
+
+		{IF, "if"},
+		{LPAREN, "("},
+		{INT, "5"},
+		{LES, "<"},
+		{INT, "10"},
+		{RPAREN, ")"},
+		{LBRACKET, "{"},
+		{RETURN, "return"},
+		{TRUE, "true"},
+		{SEMICOLON, ";"},
+		{RBRACKET, "}"},
+		{ELSE, "else"},
+		{LBRACKET, "{"},
+		{RETURN, "return"},
+		{FALSE, "false"},
+		{SEMICOLON, ";"},
+		{RBRACKET, "}"},
+
+		{INT, "10"},
+		{EQ, "=="},
+		{INT, "10"},
+		{SEMICOLON, ";"},
+
+		{INT, "10"},
+		{NOT_EQ, "!="},
+		{INT, "9"},
+		{SEMICOLON, ";"},
+
+		{EOF, "EOF"},
 	}
 
 	for _, test := range tests {

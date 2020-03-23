@@ -3,17 +3,24 @@ package lexer
 type TokenType string
 
 const (
-	ILLEGAL = "ILLEGAL"
-	EOF     = "EOF"
-
 	IDENTIFIER = "IDENTIFIER"
 	INT        = "INTEGER"
 	LET        = "LET"
 	FUNCTION   = "FUNCTION"
+	IF         = "IF"
+	ELSE       = "ELSE"
+	RETURN     = "RETURN"
+	TRUE       = "TRUE"
+	FALSE      = "FALSE"
 
-	ASSIGN = "="
-	PLUS   = "+"
-	MINUS  = "-"
+	GRT = ">"
+	LES = "<"
+
+	BANG     = "!"
+	PLUS     = "+"
+	MINUS    = "-"
+	SLASH    = "/"
+	ASTERISK = "*"
 
 	LBRACKET  = "{"
 	RBRACKET  = "}"
@@ -21,6 +28,14 @@ const (
 	RPAREN    = ")"
 	SEMICOLON = ";"
 	COMMA     = ","
+
+	EQ     = "=="
+	NOT_EQ = "!="
+
+	ASSIGN = "="
+
+	ILLEGAL = "ILLEGAL"
+	EOF     = "EOF"
 )
 
 const (
@@ -29,8 +44,13 @@ const (
 )
 
 var keywords = map[string]TokenType{
-	"fn":  FUNCTION,
-	"let": LET,
+	"fn":     FUNCTION,
+	"let":    LET,
+	"if":     IF,
+	"else":   ELSE,
+	"return": RETURN,
+	"true":   TRUE,
+	"false":  FALSE,
 }
 
 type Token struct {

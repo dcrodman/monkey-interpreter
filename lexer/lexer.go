@@ -38,30 +38,51 @@ func NewLexerForFile(filename string) (*Lexer, error) {
 }
 
 func (l *Lexer) NextToken() Token {
-	literal := string(l.getNextRune())
+	nextRune := l.getNextRune()
+	literal := string(nextRune)
 	var tokenType TokenType
 
-	switch literal {
-	case "{":
-		tokenType = LBRACKET
-	case "}":
-		tokenType = RBRACKET
-	case "(":
-		tokenType = LPAREN
-	case ")":
-		tokenType = RPAREN
-	case ";":
-		tokenType = SEMICOLON
-	case "=":
-		tokenType = ASSIGN
-	case "+":
+	switch nextRune {
+	case '>':
+		tokenType = GRT
+	case '<':
+		tokenType = LES
+	case '=':
+		if l.peekNextRune() == '=' {
+			l.moveToNextPosition()
+			literal, tokenType = EQ, EQ
+		} else {
+			tokenType = ASSIGN
+		}
+	case '!':
+		if l.peekNextRune() == '=' {
+			l.moveToNextPosition()
+			literal, tokenType = NOT_EQ, NOT_EQ
+		} else {
+			tokenType = BANG
+		}
+	case '+':
 		tokenType = PLUS
-	case "-":
+	case '-':
 		tokenType = MINUS
-	case ",":
+	case '/':
+		tokenType = SLASH
+	case '*':
+		tokenType = ASTERISK
+	case '{':
+		tokenType = LBRACKET
+	case '}':
+		tokenType = RBRACKET
+	case '(':
+		tokenType = LPAREN
+	case ')':
+		tokenType = RPAREN
+	case ';':
+		tokenType = SEMICOLON
+	case ',':
 		tokenType = COMMA
-	case "":
-		tokenType = EOF
+	case 0:
+		literal, tokenType = EOF, EOF
 	}
 
 	// Assume the token is a literal of some kind of it doesn't match any of
@@ -78,28 +99,36 @@ func (l *Lexer) NextToken() Token {
 }
 
 func (l *Lexer) getNextRune() rune {
-	nextRune := l.readCurrentRune()
+	nextRune := l.peekCurrentRune()
 
 	// Consume whitespace until we find the next significant character.
 	for unicode.IsSpace(nextRune) {
 		l.moveToNextPosition()
-		nextRune = l.readCurrentRune()
+		nextRune = l.peekCurrentRune()
 	}
 
 	return nextRune
 }
 
-func (l *Lexer) readCurrentRune() rune {
-	if l.currentPosition >= len(l.codeInput)-1 {
+func (l *Lexer) peekCurrentRune() rune {
+	return l.readRune(l.currentPosition)
+}
+
+func (l *Lexer) peekNextRune() rune {
+	return l.readRune(l.currentPosition + 1)
+}
+
+func (l *Lexer) readRune(position int) rune {
+	if position >= len(l.codeInput)-1 {
 		return 0
 	}
-	return l.codeInput[l.currentPosition]
+	return l.codeInput[position]
 }
 
 func (l *Lexer) moveToNextPosition() {
 	l.currentPosition += 1
 
-	if string(l.readCurrentRune()) == "\n" {
+	if string(l.peekCurrentRune()) == "\n" {
 		l.currentLine += 1
 	}
 }
@@ -109,7 +138,7 @@ func (l *Lexer) moveToNextPosition() {
 func (l *Lexer) readLiteral() (string, TokenType) {
 	var literal string
 
-	for r := l.readCurrentRune(); unicode.IsDigit(r) || unicode.IsLetter(r); r = l.readCurrentRune() {
+	for r := l.peekCurrentRune(); unicode.IsDigit(r) || unicode.IsLetter(r); r = l.peekCurrentRune() {
 		literal += string(r)
 		l.moveToNextPosition()
 	}
