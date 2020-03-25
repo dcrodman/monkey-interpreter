@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"monkey-interpreter/lexer"
+	"monkey-interpreter/token"
 	"os"
 )
 
@@ -20,7 +21,7 @@ func main() {
 		tokenizer := lexer.New(stdinReader.Text())
 		t := tokenizer.NextToken()
 
-		for ; t.Type != lexer.EOF; t = tokenizer.NextToken() {
+		for ; t.Type != token.EOF; t = tokenizer.NextToken() {
 			fmt.Printf("%#v\n", t)
 		}
 		// Strip the EOF.

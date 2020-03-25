@@ -3,8 +3,8 @@ package lexer
 import (
 	"fmt"
 	"io/ioutil"
+	"monkey-interpreter/token"
 	"os"
-	"regexp"
 	"unicode"
 )
 
@@ -37,52 +37,52 @@ func NewForFile(filename string) (*Lexer, error) {
 	}, nil
 }
 
-func (l *Lexer) NextToken() Token {
+func (l *Lexer) NextToken() token.Token {
 	nextRune := l.getNextRune()
 	literal := string(nextRune)
-	var tokenType TokenType
+	var tokenType token.TokenType
 
 	switch nextRune {
 	case '>':
-		tokenType = GRT
+		tokenType = token.GRT
 	case '<':
-		tokenType = LES
+		tokenType = token.LES
 	case '=':
 		if l.peekNextRune() == '=' {
 			l.moveToNextPosition()
-			literal, tokenType = EQ, EQ
+			literal, tokenType = token.EQ, token.EQ
 		} else {
-			tokenType = ASSIGN
+			tokenType = token.ASSIGN
 		}
 	case '!':
 		if l.peekNextRune() == '=' {
 			l.moveToNextPosition()
-			literal, tokenType = NOT_EQ, NOT_EQ
+			literal, tokenType = token.NOT_EQ, token.NOT_EQ
 		} else {
-			tokenType = BANG
+			tokenType = token.BANG
 		}
 	case '+':
-		tokenType = PLUS
+		tokenType = token.PLUS
 	case '-':
-		tokenType = MINUS
+		tokenType = token.MINUS
 	case '/':
-		tokenType = SLASH
+		tokenType = token.SLASH
 	case '*':
-		tokenType = ASTERISK
+		tokenType = token.ASTERISK
 	case '{':
-		tokenType = LBRACKET
+		tokenType = token.LBRACKET
 	case '}':
-		tokenType = RBRACKET
+		tokenType = token.RBRACKET
 	case '(':
-		tokenType = LPAREN
+		tokenType = token.LPAREN
 	case ')':
-		tokenType = RPAREN
+		tokenType = token.RPAREN
 	case ';':
-		tokenType = SEMICOLON
+		tokenType = token.SEMICOLON
 	case ',':
-		tokenType = COMMA
+		tokenType = token.COMMA
 	case 0:
-		literal, tokenType = EOF, EOF
+		literal, tokenType = token.EOF, token.EOF
 	}
 
 	// Assume the token is a literal of some kind of it doesn't match any of
@@ -95,7 +95,7 @@ func (l *Lexer) NextToken() Token {
 
 	// TODO: Something useful with the ILLEGAL token type.
 
-	return Token{tokenType, literal}
+	return token.Token{tokenType, literal}
 }
 
 func (l *Lexer) getNextRune() rune {
@@ -135,7 +135,7 @@ func (l *Lexer) moveToNextPosition() {
 
 // Note: This method will advance the parser's current position in the file up until
 // it runs off the end of the literal (for instance a space or semicolon).
-func (l *Lexer) readLiteral() (string, TokenType) {
+func (l *Lexer) readLiteral() (string, token.TokenType) {
 	var literal string
 
 	for r := l.peekCurrentRune(); unicode.IsDigit(r) || unicode.IsLetter(r); r = l.peekCurrentRune() {
@@ -144,19 +144,19 @@ func (l *Lexer) readLiteral() (string, TokenType) {
 	}
 
 	if unicode.IsDigit(rune(literal[0])) {
-		if ok, _ := regexp.Match(integerRegex, []byte(literal)); !ok {
-			return literal, ILLEGAL
+		if !token.IsValidInteger(literal) {
+			return literal, token.ILLEGAL
 		}
-		return literal, INT
+		return literal, token.INT
 	}
 
 	// If it's not a number then we assume the token is a keyword or identifier.
-	if ok, _ := regexp.Match(identifierRegex, []byte(literal)); !ok {
-		return literal, ILLEGAL
+	if !token.IsValidIdentifier(literal) {
+		return literal, token.ILLEGAL
 	}
 
-	if keywordType, ok := keywords[literal]; ok {
+	if ok, keywordType := token.GetKeywordType(literal); ok {
 		return literal, keywordType
 	}
-	return literal, IDENTIFIER
+	return literal, token.IDENTIFIER
 }
