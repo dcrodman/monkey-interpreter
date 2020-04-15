@@ -19,6 +19,13 @@ type Integer struct {
 
 func (e Integer) String() string { return e.Token.Value }
 
+type Boolean struct {
+	Token token.Token
+	Value bool
+}
+
+func (e Boolean) String() string { return e.Token.Value }
+
 type PrefixExpression struct {
 	Token    token.Token
 	Operator string

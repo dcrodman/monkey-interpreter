@@ -38,6 +38,8 @@ func (p *Parser) registerParseFns() {
 		token.INT:        p.parseInteger,
 		token.BANG:       p.parsePrefixExpression,
 		token.MINUS:      p.parsePrefixExpression,
+		token.TRUE:       p.parseBoolean,
+		token.FALSE:      p.parseBoolean,
 	}
 
 	p.infixParseFns = map[token.TokenType]infixParseFn{
@@ -256,4 +258,11 @@ func (p *Parser) parseInteger() ast.Expression {
 	}
 
 	return &ast.Integer{Token: p.currentToken, Value: intVal}
+}
+
+func (p *Parser) parseBoolean() ast.Expression {
+	return &ast.Boolean{
+		Token: p.currentToken,
+		Value: p.currentToken.Type == token.TRUE,
+	}
 }
