@@ -3,6 +3,7 @@ package ast
 import (
 	"fmt"
 	"monkey-interpreter/token"
+	"strings"
 )
 
 type LetStatement struct {
@@ -31,4 +32,19 @@ type ExpressionStatement struct {
 
 func (s ExpressionStatement) String() string {
 	return s.Expression.String()
+}
+
+type BlockStatement struct {
+	Token      token.Token
+	Statements []Statement
+}
+
+func (s BlockStatement) String() string {
+	var str strings.Builder
+
+	for _, s := range s.Statements {
+		str.WriteString(s.String())
+	}
+
+	return str.String()
 }

@@ -40,6 +40,8 @@ func (p *Parser) registerParseFns() {
 		token.MINUS:      p.parsePrefixExpression,
 		token.TRUE:       p.parseBoolean,
 		token.FALSE:      p.parseBoolean,
+		token.LPAREN:     p.parseGroupedExpression,
+		token.IF:         p.parseIfExpression,
 	}
 
 	p.infixParseFns = map[token.TokenType]infixParseFn{
@@ -91,7 +93,7 @@ func (p *Parser) parseStatement() ast.Statement {
 // checks if the next token matches the specified token and if so advances the parser
 // to the next set of tokens. If the token does not match then an error is reported.
 func (p *Parser) expectAndAdvance(tokenType token.TokenType) bool {
-	if p.nextTokenMatches(tokenType) {
+	if p.nextTokenIs(tokenType) {
 		p.advanceToken()
 		return true
 	} else {
@@ -106,7 +108,11 @@ func (p *Parser) advanceToken() {
 	p.nextToken = p.lexer.NextToken()
 }
 
-func (p *Parser) nextTokenMatches(tokenType token.TokenType) bool {
+func (p *Parser) currentTokenIs(tokenType token.TokenType) bool {
+	return p.currentToken.Type == tokenType
+}
+
+func (p *Parser) nextTokenIs(tokenType token.TokenType) bool {
 	return p.nextToken.Type == tokenType
 }
 
@@ -131,7 +137,7 @@ func (p *Parser) parseLetStatement() ast.Statement {
 
 	//expressionValue := p.parseExpression()
 
-	for p.currentToken.Type != token.SEMICOLON {
+	for !p.currentTokenIs(token.SEMICOLON) {
 		p.advanceToken()
 	}
 
@@ -148,7 +154,7 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 	p.advanceToken()
 	//expressionValue := p.parseExpression()
 
-	for p.currentToken.Type != token.SEMICOLON {
+	for !p.currentTokenIs(token.SEMICOLON) {
 		p.advanceToken()
 	}
 
@@ -165,7 +171,7 @@ func (p *Parser) parseExpressionStatement() ast.Statement {
 		Expression: p.parseExpression(LOWEST),
 	}
 
-	for p.nextTokenMatches(token.SEMICOLON) {
+	for p.nextTokenIs(token.SEMICOLON) {
 		p.advanceToken()
 	}
 
@@ -184,7 +190,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 	leftExpr := prefix()
 
-	for !p.nextTokenMatches(token.SEMICOLON) && precedence < p.nextTokenPrecedence() {
+	for !p.nextTokenIs(token.SEMICOLON) && precedence < p.nextTokenPrecedence() {
 		infix := p.infixParseFns[p.nextToken.Type]
 		if infix == nil {
 			return leftExpr
@@ -195,6 +201,18 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	}
 
 	return leftExpr
+}
+
+func (p *Parser) parseGroupedExpression() ast.Expression {
+	p.advanceToken()
+
+	exp := p.parseExpression(LOWEST)
+
+	if !p.expectAndAdvance(token.RPAREN) {
+		return nil
+	}
+
+	return exp
 }
 
 // returns the operator precedence for the current token.
@@ -263,6 +281,61 @@ func (p *Parser) parseInteger() ast.Expression {
 func (p *Parser) parseBoolean() ast.Expression {
 	return &ast.Boolean{
 		Token: p.currentToken,
-		Value: p.currentToken.Type == token.TRUE,
+		Value: p.currentTokenIs(token.TRUE),
 	}
+}
+
+func (p *Parser) parseIfExpression() ast.Expression {
+	exp := &ast.IfExpression{Token: p.currentToken}
+
+	if !p.expectAndAdvance(token.LPAREN) {
+		return nil
+	}
+
+	p.advanceToken()
+	exp.Condition = p.parseExpression(LOWEST)
+
+	// Consume the expected tokens up until we start the conditional block.
+	if !p.expectAndAdvance(token.RPAREN) {
+		return nil
+	} else if !p.expectAndAdvance(token.LBRACKET) {
+		return nil
+	}
+
+	exp.Consequence = p.parseBlockStatement()
+
+	if p.nextTokenIs(token.ELSE) {
+		p.advanceToken()
+
+		if !p.expectAndAdvance(token.LBRACKET) {
+			return nil
+		}
+
+		exp.Alternative = p.parseBlockStatement()
+	}
+
+	return exp
+}
+
+func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+	block := &ast.BlockStatement{
+		Token:      p.currentToken,
+		Statements: []ast.Statement{},
+	}
+
+	p.advanceToken()
+
+	// Read statements until we hit the end of the block (or the file). Conceptually
+	// this is how the top-level parser loop iterates over the code, just in the
+	// context of a specific block rather than the entire program.
+	for !p.currentTokenIs(token.RBRACKET) && !p.currentTokenIs(token.EOF) {
+		stmt := p.parseStatement()
+		if stmt != nil {
+			block.Statements = append(block.Statements, stmt)
+		}
+
+		p.advanceToken()
+	}
+
+	return block
 }

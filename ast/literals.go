@@ -3,6 +3,7 @@ package ast
 import (
 	"fmt"
 	"monkey-interpreter/token"
+	"strings"
 )
 
 type Identifier struct {
@@ -45,4 +46,27 @@ type InfixExpression struct {
 
 func (e InfixExpression) String() string {
 	return fmt.Sprintf("(%s %s %s)", e.Left.String(), e.Operator, e.Right.String())
+}
+
+type IfExpression struct {
+	Token       token.Token
+	Condition   Expression
+	Consequence *BlockStatement
+	Alternative *BlockStatement
+}
+
+func (e IfExpression) String() string {
+	var str strings.Builder
+
+	str.WriteString("if ")
+	str.WriteString(e.Condition.String())
+	str.WriteString(" ")
+	str.WriteString(e.Consequence.String())
+
+	if e.Alternative != nil {
+		str.WriteString("else")
+		str.WriteString(e.Alternative.String())
+	}
+
+	return str.String()
 }
