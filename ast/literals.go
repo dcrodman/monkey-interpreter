@@ -6,13 +6,6 @@ import (
 	"strings"
 )
 
-type Identifier struct {
-	Token token.Token
-	Value string
-}
-
-func (e Identifier) String() string { return e.Value }
-
 type Integer struct {
 	Token token.Token
 	Value int64
@@ -26,6 +19,37 @@ type Boolean struct {
 }
 
 func (e Boolean) String() string { return e.Token.Value }
+
+type Identifier struct {
+	Token token.Token
+	Value string
+}
+
+func (e Identifier) String() string { return e.Value }
+
+type Function struct {
+	Token      token.Token
+	Parameters []*Identifier
+	Body       *BlockStatement
+}
+
+func (e Function) String() string {
+	var str strings.Builder
+
+	str.WriteString("func ")
+	str.WriteString("(")
+
+	var params []string
+	for _, p := range e.Parameters {
+		params = append(params, p.String())
+	}
+
+	str.WriteString(strings.Join(params, ","))
+	str.WriteString(")")
+	str.WriteString(e.Body.String())
+
+	return str.String()
+}
 
 type PrefixExpression struct {
 	Token    token.Token

@@ -42,6 +42,7 @@ func (p *Parser) registerParseFns() {
 		token.FALSE:      p.parseBoolean,
 		token.LPAREN:     p.parseGroupedExpression,
 		token.IF:         p.parseIfExpression,
+		token.FUNCTION:   p.parseFunction,
 	}
 
 	p.infixParseFns = map[token.TokenType]infixParseFn{
@@ -338,4 +339,55 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	}
 
 	return block
+}
+
+func (p *Parser) parseFunction() ast.Expression {
+	f := &ast.Function{Token: p.currentToken}
+
+	if !p.expectAndAdvance(token.LPAREN) {
+		return nil
+	}
+
+	f.Parameters = p.parseFunctionParameters()
+
+	if !p.expectAndAdvance(token.LBRACKET) {
+		return nil
+	}
+
+	f.Body = p.parseBlockStatement()
+
+	return f
+}
+
+func (p *Parser) parseFunctionParameters() []*ast.Identifier {
+	identifiers := []*ast.Identifier{}
+
+	if p.nextTokenIs(token.RPAREN) {
+		p.advanceToken()
+		return identifiers
+	}
+
+	p.advanceToken()
+
+	identifiers = append(identifiers, &ast.Identifier{
+		Token: p.currentToken,
+		Value: p.currentToken.Value,
+	})
+
+	// Continue reading the list of parameters until we hit the ).
+	for p.nextTokenIs(token.COMMA) {
+		p.advanceToken()
+		p.advanceToken()
+
+		identifiers = append(identifiers, &ast.Identifier{
+			Token: p.currentToken,
+			Value: p.currentToken.Value,
+		})
+	}
+
+	if !p.expectAndAdvance(token.RPAREN) {
+		return nil
+	}
+
+	return identifiers
 }
