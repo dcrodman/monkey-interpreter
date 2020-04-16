@@ -1,9 +1,11 @@
 # Monkey
 
 A simple interpreter for the Monkey language built by following along with the book 
-[Writing an Interpreter in Go by Thorsten Ball](https://www.amazon.com/Writing-Interpreter-Go-Thorsten-Ball-ebook/dp/B01N2T1VD2/ref=sr_1_1?crid=2FLUXA8PN01BD&keywords=writing+an+interpreter+in+go&qid=1584926025&sprefix=writing+an+inter%2Caps%2C215&sr=8-1).
+[Writing an Interpreter in Go ](https://www.amazon.com/Writing-Interpreter-Go-Thorsten-Ball-ebook/dp/B01N2T1VD2/ref=sr_1_1?crid=2FLUXA8PN01BD&keywords=writing+an+interpreter+in+go&qid=1584926025&sprefix=writing+an+inter%2Caps%2C215&sr=8-1).
+by Thorsten Ball. If you've ever been curious about how parsers, ASTs, or interpreters work
+then you should definitely check it out!
 
-This project is my own implementation based on the concepts from this book and in many (if not all)
+This project is my own implementation based on the concepts from this book and in many
 cases will vary significantly from the book's. 
 
 ## Usage
