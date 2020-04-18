@@ -54,6 +54,7 @@ func (p *Parser) registerParseFns() {
 		token.NOT_EQ:   p.parseInfixExpression,
 		token.LES:      p.parseInfixExpression,
 		token.GRT:      p.parseInfixExpression,
+		token.LPAREN:   p.parseCallExpression,
 	}
 }
 
@@ -124,45 +125,40 @@ func (p *Parser) addExpectedTokenError(expected token.TokenType) {
 
 // parses `let <identifier> = <expression>;` statements.
 func (p *Parser) parseLetStatement() ast.Statement {
-	letToken := p.currentToken
+	stmt := &ast.LetStatement{Token: p.currentToken}
 
 	if !p.expectAndAdvance(token.IDENTIFIER) {
 		return nil
 	}
 
-	identifier := &ast.Identifier{Token: p.currentToken, Value: p.currentToken.Value}
+	stmt.Name = &ast.Identifier{Token: p.currentToken, Value: p.currentToken.Value}
 
 	if !p.expectAndAdvance(token.ASSIGN) {
 		return nil
 	}
 
-	//expressionValue := p.parseExpression()
+	p.advanceToken()
+	stmt.Value = p.parseExpression(LOWEST)
 
-	for !p.currentTokenIs(token.SEMICOLON) {
+	if p.nextTokenIs(token.SEMICOLON) {
 		p.advanceToken()
 	}
 
-	return ast.LetStatement{
-		Token: letToken,
-		Name:  identifier,
-		//Value: expressionValue,
-	}
+	return stmt
 }
 
 // parses `return <expression>;` statements.
 func (p *Parser) parseReturnStatement() ast.Statement {
-	returnToken := p.currentToken
-	p.advanceToken()
-	//expressionValue := p.parseExpression()
+	stmt := &ast.ReturnStatement{Token: p.currentToken}
 
-	for !p.currentTokenIs(token.SEMICOLON) {
+	p.advanceToken()
+	stmt.Value = p.parseExpression(LOWEST)
+
+	if p.nextTokenIs(token.SEMICOLON) {
 		p.advanceToken()
 	}
 
-	return ast.ReturnStatement{
-		Token: returnToken,
-		//Value: expressionValue,
-	}
+	return stmt
 }
 
 // parses `<expression>;` statements.
@@ -390,4 +386,37 @@ func (p *Parser) parseFunctionParameters() []*ast.Identifier {
 	}
 
 	return identifiers
+}
+
+func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
+	return &ast.CallExpression{
+		Token:     p.currentToken,
+		Function:  function,
+		Arguments: p.parseCallExpressionArguments(),
+	}
+}
+
+func (p *Parser) parseCallExpressionArguments() []ast.Expression {
+	args := make([]ast.Expression, 0)
+
+	if p.nextTokenIs(token.RPAREN) {
+		p.advanceToken()
+		return args
+	}
+
+	p.advanceToken()
+	args = append(args, p.parseExpression(LOWEST))
+
+	for p.nextTokenIs(token.COMMA) {
+		p.advanceToken()
+		p.advanceToken()
+
+		args = append(args, p.parseExpression(LOWEST))
+	}
+
+	if !p.expectAndAdvance(token.RPAREN) {
+		return nil
+	}
+
+	return args
 }

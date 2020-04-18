@@ -94,3 +94,26 @@ func (e IfExpression) String() string {
 
 	return str.String()
 }
+
+type CallExpression struct {
+	Token     token.Token
+	Function  Expression
+	Arguments []Expression
+}
+
+func (e CallExpression) String() string {
+	var str strings.Builder
+
+	str.WriteString(e.Function.String())
+	str.WriteString("(")
+
+	var params []string
+	for _, p := range e.Arguments {
+		params = append(params, p.String())
+	}
+
+	str.WriteString(strings.Join(params, ", "))
+	str.WriteString(")")
+
+	return str.String()
+}
