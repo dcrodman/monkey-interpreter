@@ -3,13 +3,18 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"monkey-interpreter/lexer"
-	"monkey-interpreter/token"
+	"monkey-interpreter/parser"
 	"os"
 )
 
 func main() {
-	stdinReader := bufio.NewScanner(os.Stdin)
+	Start(os.Stdin, os.Stdout)
+}
+
+func Start(in io.Reader, out io.Writer) {
+	stdinReader := bufio.NewScanner(in)
 
 	for {
 		fmt.Print(">> ")
@@ -18,13 +23,19 @@ func main() {
 			return
 		}
 
-		tokenizer := lexer.New(stdinReader.Text())
-		t := tokenizer.NextToken()
+		l := lexer.New(stdinReader.Text())
+		p := parser.New(l)
 
-		for ; t.Type != token.EOF; t = tokenizer.NextToken() {
-			fmt.Printf("%#v\n", t)
+		program := p.ParseProgram()
+		if len(p.Errors()) != 0 {
+			for _, msg := range p.Errors() {
+				io.WriteString(out, "\t"+msg.Error()+"\n")
+			}
+
+			continue
 		}
-		// Strip the EOF.
-		tokenizer.NextToken()
+
+		io.WriteString(out, program.String())
+		io.WriteString(out, "\n")
 	}
 }
