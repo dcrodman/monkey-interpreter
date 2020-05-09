@@ -15,7 +15,7 @@ var (
 func Eval(node ast.Node) object.Object {
 	switch node := node.(type) {
 	case *ast.AST:
-		return evalStatements(node.Statements)
+		return evalProgram(node.Statements)
 	case ast.ExpressionStatement:
 		return Eval(node.Expression)
 	case *ast.Integer:
@@ -29,15 +29,26 @@ func Eval(node ast.Node) object.Object {
 		left := Eval(node.Left)
 		right := Eval(node.Right)
 		return evalInfixExpression(node.Operator, left, right)
+	case *ast.IfExpression:
+		return evalIfExpression(node)
+	case *ast.BlockStatement:
+		return evalBlockStatement(node)
+	case *ast.ReturnStatement:
+		val := Eval(node.Value)
+		return &object.Return{Value: val}
 	}
 	return nil
 }
 
-func evalStatements(stmts []ast.Statement) object.Object {
+func evalProgram(stmts []ast.Statement) object.Object {
 	var result object.Object
 
 	for _, stmt := range stmts {
 		result = Eval(stmt)
+
+		if returnValue, ok := result.(*object.Return); ok {
+			return returnValue.Value
+		}
 	}
 
 	return result
@@ -121,6 +132,42 @@ func evalIntegerInfixExpression(
 	default:
 		return NULL
 	}
+}
+
+func evalIfExpression(ie *ast.IfExpression) object.Object {
+	condition := Eval(ie.Condition)
+
+	if isTruthy(condition) {
+		return Eval(ie.Consequence)
+	} else if ie.Alternative != nil {
+		return Eval(ie.Alternative)
+	}
+	return NULL
+}
+
+func isTruthy(obj object.Object) bool {
+	switch obj {
+	case NULL, FALSE:
+		return false
+	case TRUE:
+		return true
+	default:
+		return true
+	}
+}
+
+func evalBlockStatement(block *ast.BlockStatement) object.Object {
+	var result object.Object
+
+	for _, statement := range block.Statements {
+		result = Eval(statement)
+
+		if result != nil && result.Type() == object.RETURN_VALUE_OBJ {
+			return result
+		}
+	}
+
+	return result
 }
 
 func intToIntegerObject(val int64) *object.Integer {

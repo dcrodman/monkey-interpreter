@@ -8,6 +8,8 @@ const (
 	INTEGER_OBJ = "integer"
 	BOOLEAN_OBJ = "boolean"
 	NULL_OBJ    = "null"
+
+	RETURN_VALUE_OBJ = "RETURN_VALUE"
 )
 
 type Object interface {
@@ -19,17 +21,26 @@ type Integer struct {
 	Value int64
 }
 
-func (i *Integer) Type() ObjectType { return INTEGER_OBJ }
-func (i *Integer) Inspect() string  { return fmt.Sprintf("%d", i.Value) }
+func (*Integer) Type() ObjectType  { return INTEGER_OBJ }
+func (i *Integer) Inspect() string { return fmt.Sprintf("%d", i.Value) }
 
 type Boolean struct {
 	Value bool
 }
 
-func (b *Boolean) Type() ObjectType { return BOOLEAN_OBJ }
-func (b *Boolean) Inspect() string  { return fmt.Sprintf("%t", b.Value) }
+func (*Boolean) Type() ObjectType  { return BOOLEAN_OBJ }
+func (b *Boolean) Inspect() string { return fmt.Sprintf("%t", b.Value) }
 
 type Null struct{}
 
-func (n *Null) Type() ObjectType { return NULL_OBJ }
-func (b *Null) Inspect() string  { return "null" }
+func (*Null) Type() ObjectType { return NULL_OBJ }
+func (*Null) Inspect() string  { return "null" }
+
+type Return struct {
+	Value Object
+}
+
+func (*Return) Type() ObjectType { return RETURN_VALUE_OBJ }
+func (r *Return) Inspect() string {
+	return fmt.Sprintf("return %s", r.Value.Inspect())
+}
