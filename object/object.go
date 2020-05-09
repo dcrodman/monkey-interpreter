@@ -10,6 +10,7 @@ const (
 	NULL_OBJ    = "null"
 
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
+	ERROR_OBJ        = "ERROR_OBJ"
 )
 
 type Object interface {
@@ -44,3 +45,10 @@ func (*Return) Type() ObjectType { return RETURN_VALUE_OBJ }
 func (r *Return) Inspect() string {
 	return fmt.Sprintf("return %s", r.Value.Inspect())
 }
+
+type Error struct {
+	Message string
+}
+
+func (e Error) Type() ObjectType { return ERROR_OBJ }
+func (e Error) Inspect() string  { return "ERROR: " + e.Message }
