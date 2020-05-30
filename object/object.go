@@ -1,13 +1,18 @@
 package object
 
-import "fmt"
+import (
+	"fmt"
+	"monkey-interpreter/ast"
+	"strings"
+)
 
 type ObjectType string
 
 const (
-	INTEGER_OBJ = "integer"
-	BOOLEAN_OBJ = "boolean"
-	NULL_OBJ    = "null"
+	INTEGER_OBJ  = "integer"
+	BOOLEAN_OBJ  = "boolean"
+	NULL_OBJ     = "null"
+	FUNCTION_OBJ = "function"
 
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
 	ERROR_OBJ        = "ERROR_OBJ"
@@ -50,5 +55,29 @@ type Error struct {
 	Message string
 }
 
-func (e Error) Type() ObjectType { return ERROR_OBJ }
-func (e Error) Inspect() string  { return "ERROR: " + e.Message }
+func (e *Error) Type() ObjectType { return ERROR_OBJ }
+func (e *Error) Inspect() string  { return "ERROR: " + e.Message }
+
+type Function struct {
+	Parameters []*ast.Identifier
+	Body       *ast.BlockStatement
+	Env        *Environment
+}
+
+func (f *Function) Type() ObjectType { return FUNCTION_OBJ }
+func (f *Function) Inspect() string {
+	var str strings.Builder
+
+	params := make([]string, 0)
+	for _, param := range f.Parameters {
+		params = append(params, param.String())
+	}
+
+	str.WriteString("fn (")
+	str.WriteString(strings.Join(params, ","))
+	str.WriteString(") {\n")
+	str.WriteString(f.Body.String())
+	str.WriteString("}")
+
+	return str.String()
+}
