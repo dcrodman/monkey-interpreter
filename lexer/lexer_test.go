@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	token2 "monkey-interpreter/token"
+	"monkey-interpreter/token"
 	"testing"
 )
 
@@ -26,104 +26,109 @@ func TestLexer_NextToken(t *testing.T) {
 
 	10 == 10;
 	10 != 9;
+	"foobar"
+	"foo bar"
 	`
 	lexer := New(code)
 
 	tests := []struct {
-		token token2.TokenType
+		token token.TokenType
 		value string
 	}{
-		{token2.LET, "let"},
-		{token2.IDENTIFIER, "five"},
-		{token2.ASSIGN, "="},
-		{token2.INT, "5"},
-		{token2.SEMICOLON, ";"},
+		{token.LET, "let"},
+		{token.IDENTIFIER, "five"},
+		{token.ASSIGN, "="},
+		{token.INT, "5"},
+		{token.SEMICOLON, ";"},
 
-		{token2.LET, "let"},
-		{token2.IDENTIFIER, "ten"},
-		{token2.ASSIGN, "="},
-		{token2.INT, "10"},
-		{token2.SEMICOLON, ";"},
+		{token.LET, "let"},
+		{token.IDENTIFIER, "ten"},
+		{token.ASSIGN, "="},
+		{token.INT, "10"},
+		{token.SEMICOLON, ";"},
 
-		{token2.LET, "let"},
-		{token2.IDENTIFIER, "add"},
-		{token2.ASSIGN, "="},
-		{token2.FUNCTION, "fn"},
-		{token2.LPAREN, "("},
-		{token2.IDENTIFIER, "x"},
-		{token2.COMMA, ","},
-		{token2.IDENTIFIER, "y"},
-		{token2.RPAREN, ")"},
-		{token2.LBRACKET, "{"},
-		{token2.IDENTIFIER, "x"},
-		{token2.PLUS, "+"},
-		{token2.IDENTIFIER, "y"},
-		{token2.SEMICOLON, ";"},
-		{token2.RBRACKET, "}"},
-		{token2.SEMICOLON, ";"},
+		{token.LET, "let"},
+		{token.IDENTIFIER, "add"},
+		{token.ASSIGN, "="},
+		{token.FUNCTION, "fn"},
+		{token.LPAREN, "("},
+		{token.IDENTIFIER, "x"},
+		{token.COMMA, ","},
+		{token.IDENTIFIER, "y"},
+		{token.RPAREN, ")"},
+		{token.LBRACKET, "{"},
+		{token.IDENTIFIER, "x"},
+		{token.PLUS, "+"},
+		{token.IDENTIFIER, "y"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACKET, "}"},
+		{token.SEMICOLON, ";"},
 
-		{token2.LET, "let"},
-		{token2.IDENTIFIER, "result"},
-		{token2.ASSIGN, "="},
-		{token2.IDENTIFIER, "add"},
-		{token2.LPAREN, "("},
-		{token2.IDENTIFIER, "five"},
-		{token2.COMMA, ","},
-		{token2.IDENTIFIER, "ten"},
-		{token2.RPAREN, ")"},
-		{token2.SEMICOLON, ";"},
+		{token.LET, "let"},
+		{token.IDENTIFIER, "result"},
+		{token.ASSIGN, "="},
+		{token.IDENTIFIER, "add"},
+		{token.LPAREN, "("},
+		{token.IDENTIFIER, "five"},
+		{token.COMMA, ","},
+		{token.IDENTIFIER, "ten"},
+		{token.RPAREN, ")"},
+		{token.SEMICOLON, ";"},
 
-		{token2.BANG, "!"},
-		{token2.MINUS, "-"},
-		{token2.SLASH, "/"},
-		{token2.ASTERISK, "*"},
-		{token2.INT, "5"},
-		{token2.SEMICOLON, ";"},
+		{token.BANG, "!"},
+		{token.MINUS, "-"},
+		{token.SLASH, "/"},
+		{token.ASTERISK, "*"},
+		{token.INT, "5"},
+		{token.SEMICOLON, ";"},
 
-		{token2.INT, "5"},
-		{token2.LES, "<"},
-		{token2.INT, "10"},
-		{token2.GRT, ">"},
-		{token2.INT, "5"},
-		{token2.SEMICOLON, ";"},
+		{token.INT, "5"},
+		{token.LES, "<"},
+		{token.INT, "10"},
+		{token.GRT, ">"},
+		{token.INT, "5"},
+		{token.SEMICOLON, ";"},
 
-		{token2.IF, "if"},
-		{token2.LPAREN, "("},
-		{token2.INT, "5"},
-		{token2.LES, "<"},
-		{token2.INT, "10"},
-		{token2.RPAREN, ")"},
-		{token2.LBRACKET, "{"},
-		{token2.RETURN, "return"},
-		{token2.TRUE, "true"},
-		{token2.SEMICOLON, ";"},
-		{token2.RBRACKET, "}"},
-		{token2.ELSE, "else"},
-		{token2.LBRACKET, "{"},
-		{token2.RETURN, "return"},
-		{token2.FALSE, "false"},
-		{token2.SEMICOLON, ";"},
-		{token2.RBRACKET, "}"},
+		{token.IF, "if"},
+		{token.LPAREN, "("},
+		{token.INT, "5"},
+		{token.LES, "<"},
+		{token.INT, "10"},
+		{token.RPAREN, ")"},
+		{token.LBRACKET, "{"},
+		{token.RETURN, "return"},
+		{token.TRUE, "true"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACKET, "}"},
+		{token.ELSE, "else"},
+		{token.LBRACKET, "{"},
+		{token.RETURN, "return"},
+		{token.FALSE, "false"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACKET, "}"},
 
-		{token2.INT, "10"},
-		{token2.EQ, "=="},
-		{token2.INT, "10"},
-		{token2.SEMICOLON, ";"},
+		{token.INT, "10"},
+		{token.EQ, "=="},
+		{token.INT, "10"},
+		{token.SEMICOLON, ";"},
 
-		{token2.INT, "10"},
-		{token2.NOT_EQ, "!="},
-		{token2.INT, "9"},
-		{token2.SEMICOLON, ";"},
+		{token.INT, "10"},
+		{token.NOT_EQ, "!="},
+		{token.INT, "9"},
+		{token.SEMICOLON, ";"},
 
-		{token2.EOF, "EOF"},
+		{token.STRING, "foobar"},
+		{token.STRING, "foo bar"},
+
+		{token.EOF, "EOF"},
 	}
 
 	for _, test := range tests {
-		token := lexer.NextToken()
+		nextToken := lexer.NextToken()
 
-		if token.Type != test.token || token.Value != test.value {
+		if nextToken.Type != test.token || nextToken.Value != test.value {
 			t.Fatalf("wanted Token = '%v', Value = '%v'; got Token = '%v', Value = '%v'",
-				test.token, test.value, token.Type, token.Value)
+				test.token, test.value, nextToken.Type, nextToken.Value)
 		}
 	}
 }

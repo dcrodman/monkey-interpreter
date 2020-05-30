@@ -81,11 +81,14 @@ func (l *Lexer) NextToken() token.Token {
 		tokenType = token.SEMICOLON
 	case ',':
 		tokenType = token.COMMA
+	case '"':
+		tokenType = token.STRING
+		literal = l.readString()
 	case 0:
 		literal, tokenType = token.EOF, token.EOF
 	}
 
-	// Assume the token is a literal of some kind of it doesn't match any of
+	// Assume the token is a literal of some kind if it doesn't match any of
 	// the special characters. readLiteral() will handle advancing the parser.
 	if tokenType == "" {
 		literal, tokenType = l.readLiteral()
@@ -95,7 +98,7 @@ func (l *Lexer) NextToken() token.Token {
 
 	// TODO: Something useful with the ILLEGAL token type.
 
-	return token.Token{tokenType, literal}
+	return token.Token{Type: tokenType, Value: literal}
 }
 
 func (l *Lexer) getNextRune() rune {
@@ -159,4 +162,18 @@ func (l *Lexer) readLiteral() (string, token.TokenType) {
 		return literal, keywordType
 	}
 	return literal, token.IDENTIFIER
+}
+
+func (l *Lexer) readString() string {
+	position := l.currentPosition + 1
+
+	for {
+		l.moveToNextPosition()
+		r := l.getNextRune()
+		if r == '"' || r == 0 {
+			break
+		}
+	}
+
+	return string(l.codeInput[position:l.currentPosition])
 }

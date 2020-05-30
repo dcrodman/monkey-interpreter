@@ -43,6 +43,7 @@ func (p *Parser) registerParseFns() {
 		token.LPAREN:     p.parseGroupedExpression,
 		token.IF:         p.parseIfExpression,
 		token.FUNCTION:   p.parseFunction,
+		token.STRING:     p.parseStringLiteral,
 	}
 
 	p.infixParseFns = map[token.TokenType]infixParseFn{
@@ -419,4 +420,8 @@ func (p *Parser) parseCallExpressionArguments() []ast.Expression {
 	}
 
 	return args
+}
+
+func (p *Parser) parseStringLiteral() ast.Expression {
+	return &ast.String{Token: p.currentToken, Value: p.currentToken.Value}
 }

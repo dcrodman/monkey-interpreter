@@ -42,6 +42,8 @@ const (
 
 	ILLEGAL = "ILLEGAL"
 	EOF     = "EOF"
+
+	STRING = "STRING"
 )
 
 const (
@@ -49,7 +51,6 @@ const (
 	integerRegex    = `^\d+$`
 )
 
-// Keywords supported by the
 var keywords = map[string]TokenType{
 	"fn":     FUNCTION,
 	"let":    LET,

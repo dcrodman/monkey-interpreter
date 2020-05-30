@@ -20,6 +20,13 @@ type Boolean struct {
 
 func (e Boolean) String() string { return e.Token.Value }
 
+type String struct {
+	Token token.Token
+	Value string
+}
+
+func (e String) String() string { return e.Token.Value }
+
 type Identifier struct {
 	Token token.Token
 	Value string
