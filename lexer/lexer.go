@@ -70,13 +70,17 @@ func (l *Lexer) NextToken() token.Token {
 	case '*':
 		tokenType = token.ASTERISK
 	case '{':
-		tokenType = token.LBRACKET
+		tokenType = token.LBRACE
 	case '}':
-		tokenType = token.RBRACKET
+		tokenType = token.RBRACE
 	case '(':
 		tokenType = token.LPAREN
 	case ')':
 		tokenType = token.RPAREN
+	case '[':
+		tokenType = token.LBRACKET
+	case ']':
+		tokenType = token.RBRACKET
 	case ';':
 		tokenType = token.SEMICOLON
 	case ',':

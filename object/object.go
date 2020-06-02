@@ -18,6 +18,9 @@ const (
 	ERROR_OBJ        = "ERROR_OBJ"
 
 	STRING_OBJ = "STRING"
+	ARRAY_OBJ  = "ARRAY"
+
+	BUILTIN_OBJ = "BUILTIN"
 )
 
 type Object interface {
@@ -45,6 +48,26 @@ type String struct {
 
 func (*String) Type() ObjectType  { return STRING_OBJ }
 func (s *String) Inspect() string { return s.Value }
+
+type Array struct {
+	Elements []Object
+}
+
+func (*Array) Type() ObjectType { return ARRAY_OBJ }
+func (a *Array) Inspect() string {
+	var str strings.Builder
+
+	elements := make([]string, 0)
+	for _, elem := range a.Elements {
+		elements = append(elements, elem.Inspect())
+	}
+
+	str.WriteString("[")
+	str.WriteString(strings.Join(elements, ","))
+	str.WriteString("]")
+
+	return str.String()
+}
 
 type Null struct{}
 
@@ -90,3 +113,12 @@ func (f *Function) Inspect() string {
 
 	return str.String()
 }
+
+type BuiltinFunction func(args ...Object) Object
+
+type Builtin struct {
+	Fn BuiltinFunction
+}
+
+func (b *Builtin) Type() ObjectType { return BUILTIN_OBJ }
+func (b *Builtin) Inspect() string  { return "builtin function" }

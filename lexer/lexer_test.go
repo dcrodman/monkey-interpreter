@@ -28,6 +28,8 @@ func TestLexer_NextToken(t *testing.T) {
 	10 != 9;
 	"foobar"
 	"foo bar"
+
+	[1, 2];
 	`
 	lexer := New(code)
 
@@ -56,12 +58,12 @@ func TestLexer_NextToken(t *testing.T) {
 		{token.COMMA, ","},
 		{token.IDENTIFIER, "y"},
 		{token.RPAREN, ")"},
-		{token.LBRACKET, "{"},
+		{token.LBRACE, "{"},
 		{token.IDENTIFIER, "x"},
 		{token.PLUS, "+"},
 		{token.IDENTIFIER, "y"},
 		{token.SEMICOLON, ";"},
-		{token.RBRACKET, "}"},
+		{token.RBRACE, "}"},
 		{token.SEMICOLON, ";"},
 
 		{token.LET, "let"},
@@ -95,17 +97,17 @@ func TestLexer_NextToken(t *testing.T) {
 		{token.LES, "<"},
 		{token.INT, "10"},
 		{token.RPAREN, ")"},
-		{token.LBRACKET, "{"},
+		{token.LBRACE, "{"},
 		{token.RETURN, "return"},
 		{token.TRUE, "true"},
 		{token.SEMICOLON, ";"},
-		{token.RBRACKET, "}"},
+		{token.RBRACE, "}"},
 		{token.ELSE, "else"},
-		{token.LBRACKET, "{"},
+		{token.LBRACE, "{"},
 		{token.RETURN, "return"},
 		{token.FALSE, "false"},
 		{token.SEMICOLON, ";"},
-		{token.RBRACKET, "}"},
+		{token.RBRACE, "}"},
 
 		{token.INT, "10"},
 		{token.EQ, "=="},
@@ -119,6 +121,13 @@ func TestLexer_NextToken(t *testing.T) {
 
 		{token.STRING, "foobar"},
 		{token.STRING, "foo bar"},
+
+		{token.LBRACKET, "["},
+		{token.INT, "1"},
+		{token.COMMA, ","},
+		{token.INT, "2"},
+		{token.RBRACKET, "]"},
+		{token.SEMICOLON, ";"},
 
 		{token.EOF, "EOF"},
 	}

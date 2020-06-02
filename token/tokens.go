@@ -28,10 +28,12 @@ const (
 	SLASH    = "/"
 	ASTERISK = "*"
 
-	LBRACKET  = "{"
-	RBRACKET  = "}"
+	LBRACE    = "{"
+	RBRACE    = "}"
 	LPAREN    = "("
 	RPAREN    = ")"
+	LBRACKET  = "["
+	RBRACKET  = "]"
 	SEMICOLON = ";"
 	COMMA     = ","
 

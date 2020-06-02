@@ -44,6 +44,7 @@ func (p *Parser) registerParseFns() {
 		token.IF:         p.parseIfExpression,
 		token.FUNCTION:   p.parseFunction,
 		token.STRING:     p.parseStringLiteral,
+		token.LBRACKET:   p.parseArrayLiteral,
 	}
 
 	p.infixParseFns = map[token.TokenType]infixParseFn{
@@ -56,6 +57,7 @@ func (p *Parser) registerParseFns() {
 		token.LES:      p.parseInfixExpression,
 		token.GRT:      p.parseInfixExpression,
 		token.LPAREN:   p.parseCallExpression,
+		token.LBRACKET: p.parseIndexExpression,
 	}
 }
 
@@ -164,7 +166,7 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 
 // parses `<expression>;` statements.
 func (p *Parser) parseExpressionStatement() ast.Statement {
-	statement := ast.ExpressionStatement{
+	statement := &ast.ExpressionStatement{
 		Token:      p.currentToken,
 		Expression: p.parseExpression(LOWEST),
 	}
@@ -296,7 +298,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	// Consume the expected tokens up until we start the conditional block.
 	if !p.expectAndAdvance(token.RPAREN) {
 		return nil
-	} else if !p.expectAndAdvance(token.LBRACKET) {
+	} else if !p.expectAndAdvance(token.LBRACE) {
 		return nil
 	}
 
@@ -305,7 +307,7 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	if p.nextTokenIs(token.ELSE) {
 		p.advanceToken()
 
-		if !p.expectAndAdvance(token.LBRACKET) {
+		if !p.expectAndAdvance(token.LBRACE) {
 			return nil
 		}
 
@@ -326,7 +328,7 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	// Read statements until we hit the end of the block (or the file). Conceptually
 	// this is how the top-level parser loop iterates over the code, just in the
 	// context of a specific block rather than the entire program.
-	for !p.currentTokenIs(token.RBRACKET) && !p.currentTokenIs(token.EOF) {
+	for !p.currentTokenIs(token.RBRACE) && !p.currentTokenIs(token.EOF) {
 		stmt := p.parseStatement()
 		if stmt != nil {
 			block.Statements = append(block.Statements, stmt)
@@ -347,7 +349,7 @@ func (p *Parser) parseFunction() ast.Expression {
 
 	f.Parameters = p.parseFunctionParameters()
 
-	if !p.expectAndAdvance(token.LBRACKET) {
+	if !p.expectAndAdvance(token.LBRACE) {
 		return nil
 	}
 
@@ -393,35 +395,53 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 	return &ast.CallExpression{
 		Token:     p.currentToken,
 		Function:  function,
-		Arguments: p.parseCallExpressionArguments(),
+		Arguments: p.parseExpressionList(token.RPAREN),
 	}
 }
 
-func (p *Parser) parseCallExpressionArguments() []ast.Expression {
-	args := make([]ast.Expression, 0)
+func (p *Parser) parseStringLiteral() ast.Expression {
+	return &ast.String{Token: p.currentToken, Value: p.currentToken.Value}
+}
 
-	if p.nextTokenIs(token.RPAREN) {
+func (p *Parser) parseArrayLiteral() ast.Expression {
+	elements := p.parseExpressionList(token.RBRACKET)
+	return &ast.Array{Token: p.currentToken, Elements: elements}
+}
+
+func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
+	list := []ast.Expression{}
+
+	if p.nextTokenIs(end) {
 		p.advanceToken()
-		return args
+		return list
 	}
 
 	p.advanceToken()
-	args = append(args, p.parseExpression(LOWEST))
+	list = append(list, p.parseExpression(LOWEST))
 
 	for p.nextTokenIs(token.COMMA) {
 		p.advanceToken()
 		p.advanceToken()
 
-		args = append(args, p.parseExpression(LOWEST))
+		list = append(list, p.parseExpression(LOWEST))
 	}
 
-	if !p.expectAndAdvance(token.RPAREN) {
+	if !p.expectAndAdvance(end) {
 		return nil
 	}
 
-	return args
+	return list
 }
 
-func (p *Parser) parseStringLiteral() ast.Expression {
-	return &ast.String{Token: p.currentToken, Value: p.currentToken.Value}
+func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
+	exp := &ast.IndexExpression{Token: p.currentToken, Left: left}
+
+	p.advanceToken()
+	exp.Index = p.parseExpression(LOWEST)
+
+	if !p.expectAndAdvance(token.RBRACKET) {
+		return nil
+	}
+
+	return exp
 }

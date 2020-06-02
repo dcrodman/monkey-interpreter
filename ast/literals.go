@@ -11,28 +11,28 @@ type Integer struct {
 	Value int64
 }
 
-func (e Integer) String() string { return e.Token.Value }
+func (e *Integer) String() string { return e.Token.Value }
 
 type Boolean struct {
 	Token token.Token
 	Value bool
 }
 
-func (e Boolean) String() string { return e.Token.Value }
+func (e *Boolean) String() string { return e.Token.Value }
 
 type String struct {
 	Token token.Token
 	Value string
 }
 
-func (e String) String() string { return e.Token.Value }
+func (e *String) String() string { return e.Token.Value }
 
 type Identifier struct {
 	Token token.Token
 	Value string
 }
 
-func (e Identifier) String() string { return e.Value }
+func (e *Identifier) String() string { return e.Value }
 
 type Function struct {
 	Token      token.Token
@@ -40,7 +40,7 @@ type Function struct {
 	Body       *BlockStatement
 }
 
-func (e Function) String() string {
+func (e *Function) String() string {
 	var str strings.Builder
 
 	str.WriteString("func ")
@@ -54,6 +54,27 @@ func (e Function) String() string {
 	str.WriteString(strings.Join(params, ","))
 	str.WriteString(")")
 	str.WriteString(e.Body.String())
+
+	return str.String()
+}
+
+type Array struct {
+	Token    token.Token
+	Elements []Expression
+}
+
+func (a *Array) String() string {
+	var str strings.Builder
+
+	str.WriteString("[")
+
+	var params []string
+	for _, e := range a.Elements {
+		params = append(params, e.String())
+	}
+
+	str.WriteString(strings.Join(params, ", "))
+	str.WriteString("]")
 
 	return str.String()
 }
@@ -120,6 +141,25 @@ func (e CallExpression) String() string {
 	}
 
 	str.WriteString(strings.Join(params, ", "))
+	str.WriteString(")")
+
+	return str.String()
+}
+
+type IndexExpression struct {
+	Token token.Token
+	Left  Expression
+	Index Expression
+}
+
+func (ie *IndexExpression) String() string {
+	var str strings.Builder
+
+	str.WriteString("(")
+	str.WriteString(ie.Left.String())
+	str.WriteString("[")
+	str.WriteString(ie.Index.String())
+	str.WriteString("]")
 	str.WriteString(")")
 
 	return str.String()

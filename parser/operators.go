@@ -20,6 +20,7 @@ const (
 	PRODUCT     // *
 	PREFIX      // -- or ++
 	CALL        // function(X)
+	INDEX       // array[index]
 )
 
 // Association between the tokens and their defined precedence.
@@ -33,4 +34,5 @@ var precedences = map[token.TokenType]int{
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
 	token.LPAREN:   CALL,
+	token.LBRACKET: INDEX,
 }
