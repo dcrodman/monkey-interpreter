@@ -45,6 +45,7 @@ func (p *Parser) registerParseFns() {
 		token.FUNCTION:   p.parseFunction,
 		token.STRING:     p.parseStringLiteral,
 		token.LBRACKET:   p.parseArrayLiteral,
+		token.LBRACE:     p.parseHashLiteral,
 	}
 
 	p.infixParseFns = map[token.TokenType]infixParseFn{
@@ -444,4 +445,34 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 	}
 
 	return exp
+}
+
+func (p *Parser) parseHashLiteral() ast.Expression {
+	hash := &ast.Hash{
+		Token: p.currentToken,
+		Pairs: make(map[ast.Expression]ast.Expression),
+	}
+
+	for !p.nextTokenIs(token.RBRACE) {
+		p.advanceToken()
+
+		key := p.parseExpression(LOWEST)
+
+		if !p.expectAndAdvance(token.COLON) {
+			return nil
+		}
+
+		p.advanceToken()
+		hash.Pairs[key] = p.parseExpression(LOWEST)
+
+		if !p.nextTokenIs(token.RBRACE) && !p.expectAndAdvance(token.COMMA) {
+			return nil
+		}
+	}
+
+	if !p.expectAndAdvance(token.RBRACE) {
+		return nil
+	}
+
+	return hash
 }

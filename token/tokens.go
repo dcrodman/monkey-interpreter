@@ -36,6 +36,7 @@ const (
 	RBRACKET  = "]"
 	SEMICOLON = ";"
 	COMMA     = ","
+	COLON     = ":"
 
 	EQ     = "=="
 	NOT_EQ = "!="

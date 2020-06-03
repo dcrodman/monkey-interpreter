@@ -79,6 +79,26 @@ func (a *Array) String() string {
 	return str.String()
 }
 
+type Hash struct {
+	Token token.Token
+	Pairs map[Expression]Expression
+}
+
+func (h *Hash) String() string {
+	var str strings.Builder
+
+	pairs := make([]string, 0)
+	for key, value := range h.Pairs {
+		pairs = append(pairs, key.String()+":"+value.String())
+	}
+
+	str.WriteString("{")
+	str.WriteString(strings.Join(pairs, ", "))
+	str.WriteString("}")
+
+	return str.String()
+}
+
 type PrefixExpression struct {
 	Token    token.Token
 	Operator string

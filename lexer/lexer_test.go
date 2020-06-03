@@ -30,6 +30,7 @@ func TestLexer_NextToken(t *testing.T) {
 	"foo bar"
 
 	[1, 2];
+	{"foo": "bar"};
 	`
 	lexer := New(code)
 
@@ -128,6 +129,12 @@ func TestLexer_NextToken(t *testing.T) {
 		{token.INT, "2"},
 		{token.RBRACKET, "]"},
 		{token.SEMICOLON, ";"},
+
+		{token.LBRACE, "{"},
+		{token.STRING, "foo"},
+		{token.COLON, ":"},
+		{token.STRING, "bar"},
+		{token.RBRACE, "}"},
 
 		{token.EOF, "EOF"},
 	}
